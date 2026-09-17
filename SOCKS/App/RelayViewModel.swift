@@ -92,7 +92,7 @@ final class RelayViewModel: ObservableObject {
         }
 
         let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.sample() }
+            Task { @MainActor [weak self] in self?.sample() }
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
@@ -283,7 +283,7 @@ final class BackgroundKeepAlive {
         ) { [weak self] note in
             guard let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
                   AVAudioSession.InterruptionType(rawValue: raw) == .ended else { return }
-            Task { @MainActor in self?.resumeIfNeeded() }
+            Task { @MainActor [weak self] in self?.resumeIfNeeded() }
         }
     }
 
