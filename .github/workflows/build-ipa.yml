@@ -27,7 +27,7 @@ jobs:
         run: |
           xcodebuild \
             -project SocksBypass.xcodeproj \
-            -scheme SocksBypass \
+            -target SocksBypass \
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath build \
