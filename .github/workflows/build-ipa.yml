@@ -1,0 +1,49 @@
+# build-ipa.yml — builds an UNSIGNED SocksBypass IPA on a free GitHub macOS runner.
+#
+# How to use:
+#   1. Fork https://github.com/Nanako0129/SocksBypass on GitHub (keep it public —
+#      public repos get free macOS Actions minutes).
+#   2. In your fork, create this file at .github/workflows/build-ipa.yml
+#      (or paste it via the Actions tab → "New workflow").
+#   3. Actions tab → "build-ipa" → Run workflow.
+#   4. Download the "SocksBypass-ipa" artifact when it finishes.
+#   5. Install the IPA with SideStore (My Apps → +) or LiveContainer.
+#
+name: build-ipa
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: List schemes (diagnostic)
+        run: xcodebuild -list -project SocksBypass.xcodeproj
+
+      - name: Build unsigned iOS app
+        run: |
+          xcodebuild \
+            -project SocksBypass.xcodeproj \
+            -scheme SocksBypass \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r "build/Build/Products/Release-iphoneos/SocksBypass.app" Payload/
+          zip -qr SocksBypass.ipa Payload
+          ls -la SocksBypass.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SocksBypass-ipa
+          path: SocksBypass.ipa
+          retention-days: 7
